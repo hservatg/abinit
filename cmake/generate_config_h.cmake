@@ -461,6 +461,9 @@ endif()
 # MKL features check
 #
 if (MKL_FOUND)
+
+  set(HAVE_MKL 1)
+
   try_compile(HAVE_LINALG_MKL_IMATCOPY_BOOL ${CMAKE_BINARY_DIR}/try_compile ${CMAKE_SOURCE_DIR}/cmake/try_compile/have_linalg_mkl_imatcopy.F90
     LINK_LIBRARIES MKL::MKL)
 

@@ -787,7 +787,7 @@ subroutine inverse_oper(oper,option,procb,iproc,gpu_option)
            call xginv(oper%ks(:,1+(idat-1)*oper%mbandc:idat*oper%mbandc,ikpt,isppol),oper%mbandc)
          end do ! idat
        else if(l_gpu_option==ABI_GPU_OPENMP) then
-#ifdef HAVE_OPENMP_OFFLOAD
+#if defined(HAVE_OPENMP_OFFLOAD) && !defined(__INTEL_COMPILER)
 
          ABI_MALLOC(work, (mbandc,mbandc*oper%ndat))
          !$OMP TARGET ENTER DATA MAP(alloc:work)
@@ -801,6 +801,12 @@ subroutine inverse_oper(oper,option,procb,iproc,gpu_option)
          !end do ! idat
          !$OMP TARGET EXIT DATA MAP(delete:work)
          ABI_FREE(work)
+#elif defined(HAVE_OPENMP_OFFLOAD) && defined(__INTEL_COMPILER)
+
+#warning "HSG, need to fix this - unify with previous HAVE_OPENMP_OFFLOAD"
+         do idat=1,oper%ndat
+           call xginv(oper%ks(:,1+(idat-1)*oper%mbandc:idat*oper%mbandc,ikpt,isppol),oper%mbandc)
+         end do ! idat
 
 #endif
        end if
@@ -860,7 +866,7 @@ subroutine downfold_oper(oper,paw_dmft,procb,iproc,option,op_ks_diag,gpu_option)
  complex(dpc), ABI_CONTIGUOUS pointer :: ks(:,:,:,:),mat(:,:,:),chipsi(:,:,:,:,:)
  real(dp), ABI_CONTIGUOUS pointer :: wtk(:)
  character(len=500) :: message
- complex(dpc), allocatable :: mat_temp(:,:,:),mat_temp2(:,:,:),mat_temp3(:,:)
+ complex(dpc), allocatable, target :: mat_temp(:,:,:),mat_temp2(:,:,:),mat_temp3(:,:)
 ! *********************************************************************
 
  DBG_ENTER("COLL")
@@ -1126,7 +1132,7 @@ subroutine upfold_oper(oper,paw_dmft,procb,iproc,gpu_option)
  integer :: iatom,ik,ikpt,isppol,idat,lpawu,mbandc,l_gpu_option
  integer :: ndim,ndim_max,ndat,nspinor,paral,shift
  complex(dpc), ABI_CONTIGUOUS pointer :: ks(:,:,:,:),mat(:,:,:),chipsi(:,:,:,:,:)
- complex(dpc), allocatable :: mat_temp(:,:),mat_temp2(:,:)
+ complex(dpc), allocatable, target :: mat_temp(:,:),mat_temp2(:,:)
 ! *********************************************************************
 
  l_gpu_option=ABI_GPU_DISABLED; if(present(gpu_option)) l_gpu_option=gpu_option

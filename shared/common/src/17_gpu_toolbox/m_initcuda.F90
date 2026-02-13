@@ -203,7 +203,7 @@ CONTAINS !===========================================================
 !scalars
  integer,intent(out) :: ndevice
 ! *********************************************************************
-#if defined HAVE_GPU
+#if defined (HAVE_GPU) || defined(HAVE_OPENMP_OFFLOAD)
 !--Get the number of device for this proc
  call c_get_ndevice(ndevice)
 #endif

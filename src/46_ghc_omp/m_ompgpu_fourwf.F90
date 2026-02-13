@@ -36,7 +36,7 @@ module m_ompgpu_fourwf
  use iso_c_binding
 #endif
 
-#ifdef HAVE_GPU
+#if defined(HAVE_GPU) || defined(HAVE_OPENMP_OFFLOAD)
  use m_gpu_toolbox
 #endif
 
@@ -100,8 +100,8 @@ subroutine ompgpu_fourdp(cplex,ngfft,ldx,ldy,ldz,ndat,isign,fofg,fofr)
 !scalars
  integer,intent(in) :: cplex,ngfft(18),ldx,ldy,ldz,ndat,isign
 !arrays
- real(dp),intent(inout) :: fofg(2*ldx*ldy*ldz*ndat)
- real(dp),intent(inout) :: fofr(cplex*ldx*ldy*ldz*ndat)
+ real(dp),intent(inout),target :: fofg(2*ldx*ldy*ldz*ndat)
+ real(dp),intent(inout),target :: fofr(cplex*ldx*ldy*ldz*ndat)
 
 !Local variables-------------------------------
 !scalars
@@ -207,7 +207,7 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
 !Local variables-------------------------------
 !scalars
  character(len=500) :: msg
- real(dp), allocatable :: fofrb(:,:,:,:)
+ real(dp), allocatable,target :: fofrb(:,:,:,:)
  logical :: l_use_ndo
 
  real(dp) :: xnorm,one
@@ -386,7 +386,8 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
    !$OMP END TARGET DATA
 #else
    !$OMP TARGET DATA USE_DEVICE_ADDR(work_gpu,fofr)
-   call gpu_fft_exec_z2z(FOURWF_ID, c_loc(work_gpu), c_loc(fofr), FFT_INVERSE)
+#warning HSG FIXME
+!HSG   call gpu_fft_exec_z2z(FOURWF_ID, c_loc(work_gpu), c_loc(fofr), FFT_INVERSE)
    !$OMP END TARGET DATA
 #endif
    call gpu_fft_stream_synchronize(FOURWF_ID)

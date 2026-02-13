@@ -336,7 +336,6 @@ module m_lobpcg2
 
   end function lobpcg_memInfo
 
-
   subroutine lobpcg_run(lobpcg, X0, getAX_BX, pcond, eigen, occ, residu, prtvol, nspinor, isppol, ikpt, inonsc, istep, nbdbuf)
 
     type(lobpcg_t) , intent(inout) :: lobpcg

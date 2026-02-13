@@ -1429,7 +1429,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
        'Action: suppress ngfft in input file or change it.'
        ABI_ERROR_NOSTOP(msg, ierr)
      end if
-#ifndef HAVE_GPU
+#if !defined(HAVE_GPU) && !defined(HAVE_OPENMP_OFFLOAD)
      write(msg,'(6a)') ch10,&
      ' invars0: ERROR -',ch10,&
      '   Input variable gpu_option is on but abinit hasn''t been built with GPU mode enabled !',ch10,&

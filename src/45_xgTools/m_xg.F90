@@ -47,7 +47,7 @@ module m_xg
  use mpi
 #endif
 
-#if defined(HAVE_GPU)
+#if defined(HAVE_GPU) || defined(HAVE_OPENMP_OFFLOAD)
   use m_gpu_toolbox
 #endif
 
@@ -408,10 +408,10 @@ contains
     integer   , intent(in   ) :: cols
     integer   , optional, intent(in) :: comm, me_g0, gpu_option
     integer                   :: l_gpu_option,fact
-#if defined HAVE_GPU
+#if defined (HAVE_GPU) || defined(HAVE_OPENMP_OFFLOAD)
     integer(kind=c_int32_t), parameter :: izero = 0
 #endif
-#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD && !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
+#if defined (HAVE_OPENMP_OFFLOAD) && !defined (HAVE_OPENMP_OFFLOAD_DATASTRUCTURE)
     complex(dpc), pointer :: xg__vecC(:,:)
     real(dp), pointer :: xg__vecR(:,:)
 #endif
@@ -454,7 +454,7 @@ contains
 
     else if (l_gpu_option==ABI_GPU_OPENMP) then
 
-#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+#if defined (HAVE_GPU) || defined (HAVE_OPENMP_OFFLOAD)
       select case (space)
 
       case (SPACE_R,SPACE_CR)
@@ -464,7 +464,7 @@ contains
         end if
         ABI_MALLOC(xg%vecR,(1:fact*rows,1:cols))
         xg%trans = 't'
-#if defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
+#if defined(HAVE_OPENMP_OFFLOAD_DATASTRUCTURE)
         !$OMP TARGET ENTER DATA MAP(alloc:xg%vecR)
 #else
 !FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
@@ -479,7 +479,7 @@ contains
         end if
         ABI_MALLOC(xg%vecC,(1:rows,1:cols))
         xg%trans = 'c'
-#if defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
+#if defined (HAVE_OPENMP_OFFLOAD_DATASTRUCTURE)
         !$OMP TARGET ENTER DATA MAP(alloc:xg%vecC)
 #else
 !FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
@@ -554,7 +554,7 @@ contains
     integer :: col
 !    double precision :: tsec(2)
 
-#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+#if defined(HAVE_OPENMP_OFFLOAD)
     complex(dpc), pointer :: xg__vecC(:,:)
     real(dp), pointer :: xg__vecR(:,:)
 #endif
@@ -571,7 +571,7 @@ contains
     endif
 
     if(xg%gpu_option == ABI_GPU_OPENMP) then
-#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+#if defined(HAVE_OPENMP_OFFLOAD)
       select case (xg%space)
       case (SPACE_R)
         xg__vecR => xg%vecR
@@ -655,7 +655,7 @@ contains
     endif
 
     if(xgBlock%gpu_option==ABI_GPU_OPENMP) then
-#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+#if defined(HAVE_OPENMP_OFFLOAD)
       select case (xgBlock%space)
       case (SPACE_R)
         call xgBlock_copy_from_gpu(xgBlock)
@@ -840,6 +840,8 @@ contains
     integer,optional,intent(in) :: cols
     type(c_ptr) :: cptr
 
+    integer(kind=8) :: adr
+
     integer :: rows_,cols_,fact
 
     fact = 1 ; if (xgBlock%space==SPACE_CR) fact = 2
@@ -920,6 +922,8 @@ contains
     integer,optional,intent(in) :: rows
     integer,optional,intent(in) :: cols
     type(c_ptr) :: cptr
+
+    integer(kind=8) :: adr
 
     integer :: rows_,cols_
 
@@ -1234,7 +1238,7 @@ contains
 
     type(xg_t),target, intent(inout) :: xg
 
-#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+#if defined(HAVE_OPENMP_OFFLOAD)
     complex(dpc), pointer :: xg__vecC(:,:)
     real(dp), pointer :: xg__vecR(:,:)
 #endif
@@ -1251,7 +1255,7 @@ contains
 
     else
       if(xg%gpu_option==ABI_GPU_OPENMP) then
-#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+#if defined (HAVE_OPENMP_OFFLOAD)
         if ( associated(xg%vecR) ) then
           xg__vecR => xg%vecR
           !$OMP TARGET EXIT DATA MAP(delete:xg__vecR)
@@ -1387,7 +1391,7 @@ contains
     double precision :: tsec(2)
     integer :: l_gpu_option
 
-#if defined HAVE_OPENMP_OFFLOAD && !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
+#if defined(HAVE_OPENMP_OFFLOAD) && !defined(HAVE_OPENMP_OFFLOAD_DATASTRUCTURE)
 !FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
     complex(dpc), ABI_CONTIGUOUS pointer :: xgBlockA__vecC(:,:),xgBlockB__vecC(:,:)
     real(dp), ABI_CONTIGUOUS pointer :: xgBlockA__vecR(:,:),xgBlockB__vecR(:,:)
@@ -1430,14 +1434,14 @@ contains
     xgBlockB%me_g0 = xgBlockA%me_g0
 
     if (l_gpu_option==ABI_GPU_KOKKOS .or. l_gpu_option==ABI_GPU_OPENMP) then
-#if defined HAVE_KOKKOS || defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
+#if defined(HAVE_KOKKOS) || defined(HAVE_OPENMP_OFFLOAD_DATASTRUCTURE)
       select case(xgBlockA%space)
       case (SPACE_R,SPACE_CR)
         call abi_gpu_xcopy(1, size, xgBlockA%vecR, incx, xgBlockB%vecR, incy)
       case(SPACE_C)
         call abi_gpu_xcopy(2, size, xgBlockA%vecC, incx, xgBlockB%vecC, incy)
       end select
-#elif defined HAVE_OPENMP_OFFLOAD
+#elif defined(HAVE_OPENMP_OFFLOAD)
 !FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
       select case(xgBlockA%space)
       case (SPACE_R,SPACE_CR)
@@ -1766,14 +1770,14 @@ contains
       select case(xgBlockA%space)
       case (SPACE_R)
         if (xgBlockA%gpu_option==ABI_GPU_KOKKOS .or. xgBlockA%gpu_option==ABI_GPU_OPENMP) then
-#if defined HAVE_KOKKOS || defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
+#if defined (HAVE_KOKKOS) || defined (HAVE_OPENMP_OFFLOAD_DATASTRUCTURE)
         call abi_gpu_xgemm(1, transa, transb, xgBlockW%rows, xgBlockW%cols, K, &
           calpha, &
           xgBlockA%vecR, xgBlockA%LDim, &
           xgBlockB%vecR, xgBlockB%LDim, &
           cbeta, &
           xgBlockW%vecR, xgBlockW%LDim)
-#elif defined HAVE_OPENMP_OFFLOAD
+#elif defined (HAVE_OPENMP_OFFLOAD)
 !FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
         xgBlockA__vecR => xgBlockA%vecR
         xgBlockB__vecR => xgBlockB%vecR
@@ -1800,7 +1804,7 @@ contains
         calpha = dcmplx(2*alpha,0.d0)
         alpha_ = 2.0d0 * alpha
         if (xgBlockA%gpu_option==ABI_GPU_KOKKOS .or. xgBlockA%gpu_option==ABI_GPU_OPENMP) then
-#if defined HAVE_KOKKOS || defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
+#if defined(HAVE_KOKKOS) || defined(HAVE_OPENMP_OFFLOAD_DATASTRUCTURE)
           call abi_gpu_xgemm(1, transa, transb, xgBlockW%rows, xgBlockW%cols, 2*K, &
             calpha, &
             xgBlockA%vecR, 2*xgBlockA%LDim, &
@@ -1823,7 +1827,7 @@ contains
               cone, &
               xgBlockW%vecR, xgBlockW%LDim)
           end if
-#elif defined HAVE_OPENMP_OFFLOAD
+#elif defined(HAVE_OPENMP_OFFLOAD)
 !FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
           xgBlockA__vecR => xgBlockA%vecR
           xgBlockB__vecR => xgBlockB%vecR
@@ -1886,14 +1890,14 @@ contains
         if (transb=='t') transb_ = 'c'
 
         if (xgBlockA%gpu_option==ABI_GPU_KOKKOS .or. xgBlockA%gpu_option==ABI_GPU_OPENMP) then
-#if defined HAVE_KOKKOS || defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
+#if defined (HAVE_KOKKOS) || defined (HAVE_OPENMP_OFFLOAD_DATASTRUCTURE)
           call abi_gpu_xgemm(2, transa_, transb_, xgBlockW%rows, xgBlockW%cols, K, &
             calpha, &
             xgBlockA%vecC, xgBlockA%LDim, &
             xgBlockB%vecC, xgBlockB%LDim, &
             cbeta, &
             xgBlockW%vecC, xgBlockW%LDim)
-#elif defined HAVE_OPENMP_OFFLOAD
+#elif defined (HAVE_OPENMP_OFFLOAD)
 !FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
           xgBlockA__vecC => xgBlockA%vecC
           xgBlockB__vecC => xgBlockB%vecC
@@ -1928,14 +1932,14 @@ contains
           ABI_ERROR('space(W) should be SPACE_CR')
         end if
         if (xgBlockA%gpu_option==ABI_GPU_KOKKOS .or. xgBlockA%gpu_option==ABI_GPU_OPENMP) then
-#if defined HAVE_KOKKOS || defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
+#if defined (HAVE_KOKKOS) || defined (HAVE_OPENMP_OFFLOAD_DATASTRUCTURE)
           call abi_gpu_xgemm(1, transa, transb, 2*xgBlockW%rows, xgBlockW%cols, K, &
             calpha, &
             xgBlockA%vecR, 2*xgBlockA%LDim, &
             xgBlockB%vecR, xgBlockB%LDim, &
             cbeta, &
             xgBlockW%vecR, 2*xgBlockW%LDim)
-#elif defined HAVE_OPENMP_OFFLOAD
+#elif defined (HAVE_OPENMP_OFFLOAD)
 !FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
           xgBlockA__vecR => xgBlockA%vecR
           xgBlockB__vecR => xgBlockB%vecR
@@ -2107,7 +2111,7 @@ contains
     integer        , intent(  out) :: info
     double precision :: tsec(2)
 
-#if defined HAVE_OPENMP_OFFLOAD && !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
+#if defined (HAVE_OPENMP_OFFLOAD) && !defined (HAVE_OPENMP_OFFLOAD_DATASTRUCTURE)
     complex(dpc), ABI_CONTIGUOUS pointer :: xgBlock__vecC(:,:)
     real(dp), ABI_CONTIGUOUS pointer :: xgBlock__vecR(:,:)
 #endif
@@ -2119,7 +2123,7 @@ contains
     endif
 
     if (xgBlock%gpu_option==ABI_GPU_KOKKOS .or. xgBlock%gpu_option==ABI_GPU_OPENMP) then
-#if defined HAVE_KOKKOS || defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
+#if defined (HAVE_KOKKOS) || defined (HAVE_OPENMP_OFFLOAD_DATASTRUCTURE)
       select case(xgBlock%space)
       case (SPACE_R)
         call abi_gpu_xpotrf(1,uplo,xgBlock%rows,xgBlock%vecR,xgBlock%LDim,info)
@@ -2128,7 +2132,7 @@ contains
       case (SPACE_CR)
         ABI_ERROR('Not implemented for SPACE_CR')
       end select
-#elif defined HAVE_OPENMP_OFFLOAD
+#elif defined (HAVE_OPENMP_OFFLOAD)
 !FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
       select case(xgBlock%space)
       case (SPACE_R)
@@ -5710,18 +5714,18 @@ contains
       select case(xgBlock%space)
       case (SPACE_R,SPACE_CR)
         xgBlock__vecR => xgBlock%vecR
-        !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) MAP(to:xgBlock__vecR)
+        !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2)
         do iblock = 1, cols
           do jblock = 1, fact * rows
-            xgBlock__vecR(jblock,iblock) = zero
+! HSG       xgBlock__vecR(jblock,iblock) = zero
           end do
         end do
       case (SPACE_C)
         xgBlock__vecC => xgBlock%vecC
-        !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) MAP(to:xgBlock__vecC)
+        !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2)
         do iblock = 1, cols
           do jblock = 1, fact * rows
-            xgBlock__vecC(jblock,iblock) = dcmplx(0,0)
+! HSG       xgBlock%vecC(jblock,iblock) = dcmplx(0,0)
           end do
         end do
       end select

@@ -111,7 +111,7 @@ program abinit
  use m_out_spg_anal,  only : out_spg_anal
  use m_driver,        only : driver
 
-#ifdef HAVE_GPU
+#if defined(HAVE_GPU) || defined(HAVE_OPENMP_OFFLOAD)
  use m_gpu_toolbox
 #endif
 
@@ -316,7 +316,7 @@ program abinit
      if(ii==1)iounit=ab_out
      if(ii==2)iounit=std_out
 
-     call outvars(choice,dmatpuflag,dtsets, filnam(4), iounit, mx, ndtset,ndtset_alloc,npsp,results_out_all,timopt)
+     ! HSG call outvars(choice,dmatpuflag,dtsets, filnam(4), iounit, mx, ndtset,ndtset_alloc,npsp,results_out_all,timopt)
    end do
 
    if (dtsets(1)%prtxml == 1) then
@@ -372,7 +372,7 @@ program abinit
      gpu_devices(:)=dtsets(ii)%gpu_devices(:)
    end if
  end do
-#ifdef HAVE_GPU
+#if defined(HAVE_GPU) || defined(HAVE_OPENMP_OFFLOAD)
  call setdevice_cuda(gpu_devices,gpu_option)
 #else
  if (gpu_option/=ABI_GPU_DISABLED) then
@@ -436,7 +436,7 @@ program abinit
        if(ii==1)iounit=ab_out
        if(ii==2)iounit=std_out
        write(iounit,*)' '
-       call outvars (choice,dmatpuflag,dtsets, filnam(4), iounit,mx,ndtset,ndtset_alloc,npsp,results_out_all,timopt)
+       ! HSG call outvars (choice,dmatpuflag,dtsets, filnam(4), iounit,mx,ndtset,ndtset_alloc,npsp,results_out_all,timopt)
        if(ii==2)call out_spg_anal (dtsets,(ii-1),ab_out,ndtset,ndtset_alloc,results_out_all)
        if(ii==2)write(std_out,*)' '
      end do

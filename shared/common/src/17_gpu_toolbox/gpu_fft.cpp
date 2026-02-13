@@ -9,7 +9,7 @@
  *
  * The main goal of this file is to contain GPU linear algebra encapsulation routines,
  * that will be callable from fortran routines, by pointing to the relevant
- * GPU runtime libraries (CUDA for NVIDIA targets, HIP for AMD targets).
+ * GPU runtime libraries (CUDA for NVIDIA targets, HIP for AMD targets, MKL for Intel targets).
  *
  */
 
@@ -17,7 +17,10 @@
 
 #ifdef HAVE_GPU_CUDA
 #include "gpu_fft_cuda.cpp"
-#endif
-#ifdef HAVE_GPU_HIP
+#elif HAVE_GPU_HIP
 #include "gpu_fft_hip.cpp"
+#elif HAVE_MKL
+#include "gpu_fft_mkl.cpp"
+#else
+#error Unknown GPU FFT implementation to be used
 #endif

@@ -2302,7 +2302,8 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
 !arrays
  integer,intent(in) :: gboundin(2*mgfft+8,2),gboundout(2*mgfft+8,2)
  integer,intent(in) :: kg_kin(3,npwin),kg_kout(3,npwout),ngfft(18)
- real(dp),intent(inout) :: denpot(cplex*n4,n5,n6),fofgin(2,npwin*ndat)
+ real(dp),intent(inout) :: denpot(cplex*n4,n5,n6)
+ real(dp),intent(inout),target :: fofgin(2,npwin*ndat)
  real(dp),intent(inout),optional :: fofginb(:,:) ! (2,npwin*ndat)
  real(dp),intent(inout) :: fofr(2,n4,n5,n6*ndat)
  real(dp),intent(out) :: fofgout(2,npwout*ndat)

@@ -15,7 +15,16 @@ add_library(17_gpu_toolbox STATIC
 
 set_target_properties(17_gpu_toolbox
   PROPERTIES
-  Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/modules)
+  Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/modules
+)
+if (HAVE_OPENMP_OFFLOAD)
+  set(all_OMP_FLAGS "${OpenMP_Fortran_FLAGS}" "${OPENMP_OFFLOAD_FLAGS}")
+  list(JOIN all_OMP_FLAGS " " content)
+  set_target_properties(17_gpu_toolbox
+    PROPERTIES
+    COMPILE_FLAGS "${content}"
+  )
+endif()
 
 target_include_directories(17_gpu_toolbox
   PRIVATE
@@ -81,6 +90,20 @@ if (ABINIT_YAKL_WANTED)
   target_include_directories(17_gpu_toolbox
     PUBLIC
     ${YAKL_BINARY_DIR})
+endif()
+
+if(HAVE_OPENMP_OFFLOAD)
+  target_link_libraries(17_gpu_toolbox
+    PUBLIC
+    OpenMP::OpenMP_Fortran ${OPENMP_OFFLOAD_FLAGS}
+  )
+endif()
+
+if(MKL_FOUND AND ABINIT_FFT_FLAVOR STREQUAL "MKL_DFTI")
+  target_link_libraries(17_gpu_toolbox
+    PUBLIC
+    MKL::MKL_SYCL::DFT
+    )
 endif()
 
 add_library(abinit::17_gpu_toolbox ALIAS 17_gpu_toolbox)

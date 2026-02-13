@@ -77,6 +77,8 @@ module m_build_info
 ! Info on openMP
   character(len=*),parameter :: enable_openmp = &
 &   "@enable_openmp@"
+  character(len=*),parameter :: enable_openmp_offload = &
+&   "@enable_openmp_offload@"
 
 ! Info on GPU
   character(len=*),parameter :: with_gpu      = &
@@ -169,6 +171,7 @@ subroutine dump_config(my_unit)
   write(my_unit,'(2a)')'  Parallel build : ',trim(with_mpi)
   write(my_unit,'(2a)')'  Parallel I/O   : ',trim(enable_mpi_io)
   write(my_unit,'(2a)')'  openMP support : ',trim(enable_openmp)
+  write(my_unit,'(2a)')'  openMP offload support : ',trim(enable_openmp_offload)
   write(my_unit,'(2a)')'  GPU support    : ',trim(with_gpu)
   write(my_unit,*)
   write(my_unit,'(a) ')' === Connectors / Fallbacks === '

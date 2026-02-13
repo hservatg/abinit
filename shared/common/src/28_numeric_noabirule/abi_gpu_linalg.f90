@@ -16,7 +16,7 @@
 
 !!***
 
-#ifndef HAVE_GPU
+#if !defined(HAVE_GPU) && !defined(HAVE_OPENMP_OFFLOAD)
 
 !!****f* m_abi_gpu_linalg/gpu_device_synchronize
 !! NAME
@@ -2238,7 +2238,7 @@ subroutine abi_gpu_xcopy_cptr(cplx, size, x, incrx, y, incry)
     ABI_BUG("You requested to run on CPU to a GPU wrapper :/")
   end if
 
-#ifdef HAVE_GPU
+#if defined(HAVE_GPU)
 
   call gpu_xcopy(cplx, size, x, incrx, y, incry)
 
@@ -2248,6 +2248,12 @@ subroutine abi_gpu_xcopy_cptr(cplx, size, x, incrx, y, incry)
     !potential mistakes in calling context.
     call gpu_linalg_stream_synchronize()
   end if
+
+#elif defined(HAVE_OPENMP_OFFLOAD)
+
+    !$OMP TARGET DATA USE_DEVICE_ADDR(x,y)
+    call gpu_xcopy(cplx, size, x, incrx, y, incry)
+    !$OMP END TARGET DATA
 
 #else
   ! Unused if GPU code disabled

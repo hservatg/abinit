@@ -13,7 +13,7 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
+#if defined(HAVE_CONFIG_H)
 #include "config.h"
 #endif
 
@@ -41,7 +41,7 @@ module m_invars1
  use m_matrix,   only : mati3det
  use m_mep,      only : MEP_SOLVER_STEEPEST,NEB_ALGO_IMPROVED_TAN,NEB_CELL_ALGO_NONE,STRING_ALGO_SIMPLIFIED_EQUAL
 
-#if defined HAVE_GPU
+#if defined (HAVE_GPU) || defined (HAVE_OPENMP_OFFLOAD)
  use m_gpu_toolbox
 #endif
 
@@ -557,8 +557,9 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
 
  ! GPU related parameters
  dtsets(:)%gpu_option=ABI_GPU_DISABLED
-#if defined HAVE_GPU
+#if defined (HAVE_GPU) || defined(HAVE_OPENMP_OFFLOAD)
  call Get_ndevice(idev)
+ print *,"Get_ndevice()=",idev
  if (idev>0) then
    do i1=1,ndtset_alloc
      dtsets(i1)%gpu_option=ABI_GPU_UNKNOWN
@@ -591,7 +592,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
  end do
 
  if (gpu_option/=ABI_GPU_DISABLED) then
-#if defined HAVE_GPU
+#if defined(HAVE_GPU) || defined(HAVE_OPENMP_OFFLOAD)
    if (idev<=0) then
      write(msg,'(5a)')&
 &     'Input variable gpu_option is on (/=0),',ch10,&
@@ -600,15 +601,14 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
      ABI_ERROR(msg)
    end if
    if(gpu_option==ABI_GPU_OPENMP) then
-#if !defined HAVE_OPENMP_OFFLOAD
+#if !defined(HAVE_OPENMP_OFFLOAD)
      write(msg,'(7a)')&
 &     'Input variable gpu_option is set to use OpenMP GPU backend but abinit hasn''t been built',ch10,&
 &     'with OpenMP GPU offloading enabled!',ch10,&
 &     'Action: change the input variable gpu_option',ch10,&
 &     '        or re-compile ABINIT with OpenMP GPU offloading enabled.'
      ABI_ERROR(msg)
-#endif
-#if defined HAVE_OPENMP_OFFLOAD
+#else
      if(xomp_get_num_devices() == 0) then
        write(msg,'(13a)')&
 &       'Input variable gpu_option is set to use OpenMP GPU backend ',ch10,&
@@ -622,7 +622,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
      end if
 #endif
    else if(gpu_option==ABI_GPU_KOKKOS) then
-#if !defined HAVE_KOKKOS || !defined HAVE_YAKL
+#if !defined(HAVE_KOKKOS) || !defined(HAVE_YAKL)
      write(msg,'(7a)')&
 &     'Input variable gpu_option is set to use Kokkos backend but abinit hasn''t been built',ch10,&
 &     'with Kokkos and/or YAKL dependencies enabled!',ch10,&

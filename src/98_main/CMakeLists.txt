@@ -70,6 +70,19 @@ macro(abi_build_exe exe_name)
     PROPERTIES
     LINKER_LANGUAGE "Fortran")
 
+#
+# HSG TODO::: We either rely on abinit_lib or we need to replicate the
+# target_sources below?? But also, do we need these deps for all the 
+# binries generated here?
+#
+
+  if(TARGET 17_gpu_toolbox)
+    target_sources(${exe_name} PUBLIC $<TARGET_OBJECTS:17_gpu_toolbox>)
+    if(MKL_FOUND)
+      target_link_libraries(${exe_name} PUBLIC MKL::MKL)
+    endif()
+  endif()
+
 endmacro(abi_build_exe)
 
 abi_build_exe(abinit)

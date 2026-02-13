@@ -470,7 +470,7 @@ module m_xgTransposer
   subroutine xgTransposer_makeXgBlock(xgTransposer)
 
     type(xgTransposer_t), intent(inout) :: xgTransposer
-#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD && !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
+#if defined(HAVE_OPENMP_OFFLOAD) && !defined(HAVE_OPENMP_OFFLOAD_DATASTRUCTURE)
     real(dp), ABI_CONTIGUOUS pointer :: xgTransposer__buffer(:,:)
 #endif
     !integer :: cols, rows
@@ -486,7 +486,7 @@ module m_xgTransposer
 #endif
         else
           if(xgTransposer%gpu_option == ABI_GPU_OPENMP) then
-#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+#if defined (HAVE_OPENMP_OFFLOAD)
 #ifdef HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
             !$OMP TARGET EXIT DATA MAP(delete:xgTransposer%buffer)
 #else
@@ -510,7 +510,7 @@ module m_xgTransposer
           ABI_MALLOC(xgTransposer%buffer,(2,xgTransposer%ncolsColsRows*xgTransposer%nrowsColsRows))
         end if
         if(xgTransposer%gpu_option == ABI_GPU_OPENMP) then
-#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+#if defined(HAVE_OPENMP_OFFLOAD)
 #ifdef HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
           !$OMP TARGET ENTER DATA MAP(alloc:xgTransposer%buffer)
 #else
@@ -622,7 +622,7 @@ module m_xgTransposer
    nrowsLinalgMe = nrowsLinalg(xgTransposer%mpiData(MPI_LINALG)%rank+1)
 
    ABI_MALLOC(sendbuf,(2,nrowsColsRows*ncolsColsRows))
-#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+#if defined(HAVE_OPENMP_OFFLOAD)
    !$OMP TARGET ENTER DATA MAP(alloc:sendbuf) if(xgTransposer%gpu_option == ABI_GPU_OPENMP)
 #endif
    call xgTransposer_reorganizeData(xgTransposer,sendbuf)
@@ -708,7 +708,7 @@ module m_xgTransposer
      me_cols = xgTransposer%mpiData(MPI_COLS)%rank
      !myrequest = me+1
 
-#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+#if defined(HAVE_OPENMP_OFFLOAD)
      !$OMP TARGET UPDATE FROM(sendbuf) if(xgTransposer%gpu_option == ABI_GPU_OPENMP)
 #endif
      ABI_MALLOC(sendptrbuf,(1:ncpu_cols))
@@ -722,7 +722,7 @@ module m_xgTransposer
        !call mpi_igatherv(sendptrbuf(me+1)%ptr,sendcounts(icpu),MPI_DOUBLE_PRECISION,&
        !  recvbuf,recvcounts,rdispls,MPI_DOUBLE_PRECISION,icpu-1,comm,request(icpu),ierr)
      end do
-#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+#if defined(HAVE_OPENMP_OFFLOAD)
      !$OMP TARGET UPDATE TO(recvbuf) if(xgTransposer%gpu_option == ABI_GPU_OPENMP)
 #endif
 
@@ -761,7 +761,7 @@ module m_xgTransposer
    !    end if
    !  end if
    !end do
-#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+#if defined(HAVE_OPENMP_OFFLOAD)
    !$OMP TARGET EXIT DATA MAP(delete:sendbuf) if(xgTransposer%gpu_option == ABI_GPU_OPENMP)
 #endif
    ABI_FREE(sendbuf)
@@ -817,7 +817,7 @@ module m_xgTransposer
    nrowsLinalgMe = nrowsLinalg(xgTransposer%mpiData(MPI_LINALG)%rank+1)
 
    ABI_MALLOC(recvbuf,(2,nrowsColsRows*ncolsColsRows))
-#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+#if defined(HAVE_OPENMP_OFFLOAD)
    !$OMP TARGET ENTER DATA MAP(alloc:recvbuf) if(xgTransposer%gpu_option == ABI_GPU_OPENMP)
 #endif
    ABI_MALLOC(recvcounts,(ncpu_cols))
@@ -894,7 +894,7 @@ module m_xgTransposer
 
    case (TRANS_GATHER)
 
-#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+#if defined(HAVE_OPENMP_OFFLOAD)
      !$OMP TARGET UPDATE FROM(sendbuf) if(xgTransposer%gpu_option == ABI_GPU_OPENMP)
 #endif
      !ABI_MALLOC(request,(ncpu))
@@ -918,7 +918,7 @@ module m_xgTransposer
      !call xmpi_barrier(xgTransposer%mpiData(MPI_LINALG)%comm)
      !call flush(6)
      !write(*,*) me, request
-#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+#if defined(HAVE_OPENMP_OFFLOAD)
      !$OMP TARGET UPDATE TO(recvbuf) if(xgTransposer%gpu_option == ABI_GPU_OPENMP)
 #endif
 
@@ -946,7 +946,7 @@ module m_xgTransposer
    ABI_FREE(recvcounts)
    ABI_FREE(rdispls)
 
-#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+#if defined(HAVE_OPENMP_OFFLOAD)
    !$OMP TARGET EXIT DATA MAP(delete:recvbuf) if(xgTransposer%gpu_option == ABI_GPU_OPENMP)
 #endif
    ABI_FREE(recvbuf)
@@ -1034,7 +1034,7 @@ module m_xgTransposer
 
     select case (xgTransposer%state)
     case (STATE_LINALG)
-#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+#if defined(HAVE_OPENMP_OFFLOAD)
       !$OMP TARGET UPDATE FROM(bufferMess) if(xgTransposer%gpu_option == ABI_GPU_OPENMP)
 #endif
       ! We are going to STATE_COLSROWS so we are after all2all
@@ -1052,11 +1052,11 @@ module m_xgTransposer
           end do
         end do
       end do
-#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+#if defined(HAVE_OPENMP_OFFLOAD)
       !$OMP TARGET UPDATE TO(bufferOrdered) if(xgTransposer%gpu_option == ABI_GPU_OPENMP)
 #endif
     case (STATE_COLSROWS)
-#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+#if defined(HAVE_OPENMP_OFFLOAD)
       !$OMP TARGET UPDATE FROM(bufferOrdered) if(xgTransposer%gpu_option == ABI_GPU_OPENMP)
 #endif
       ! We are going to STATE_LINALG so we are before all2all
@@ -1074,7 +1074,7 @@ module m_xgTransposer
           end do
         end do
       end do
-#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+#if defined(HAVE_OPENMP_OFFLOAD)
       !$OMP TARGET UPDATE TO(bufferMess) if(xgTransposer%gpu_option == ABI_GPU_OPENMP)
 #endif
     end select
@@ -1145,7 +1145,7 @@ module m_xgTransposer
     type(xgTransposer_t), intent(inout) :: xgTransposer
     double precision :: tsec(2)
     integer :: i
-#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD && !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
+#if defined(HAVE_OPENMP_OFFLOAD) && !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
     real(dp), ABI_CONTIGUOUS pointer :: xgTransposer__buffer(:,:)
 #endif
 
@@ -1175,7 +1175,7 @@ module m_xgTransposer
 #endif
       else
         if(xgTransposer%gpu_option == ABI_GPU_OPENMP) then
-#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+#if defined(HAVE_OPENMP_OFFLOAD)
 #ifdef HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
           !$OMP TARGET EXIT DATA MAP(delete:xgTransposer%buffer)
 #else

@@ -21,3 +21,6 @@
 #ifdef HAVE_GPU_HIP
 #include "gpu_linalg_hip.cpp"
 #endif
+#if defined(HAVE_OPENMP_OFFLOAD)
+#include "gpu_linalg_openmp.cpp"
+#endif

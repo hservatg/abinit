@@ -255,7 +255,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 #if defined HAVE_GPU && defined HAVE_YAKL
  real(c_double), ABI_CONTIGUOUS pointer :: gvnlc(:,:)
 #else
- real(dp), allocatable            :: gvnlc(:,:)
+ real(dp), allocatable, target            :: gvnlc(:,:)
 #endif
 
  real(dp), allocatable            :: vlocal_tmp(:,:,:)
@@ -1205,7 +1205,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
          if (k1_eq_k2) then
            !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) &
            !$OMP& PRIVATE(idat,ispinor) &
-           !$OMP& MAP(to:ghc,kinpw_k2,gvnlxc_,gsc,cwavef) MAP(tofrom:kinpw_k2)
+           !$OMP& MAP(to:ghc,kinpw_k2,gvnlxc_,gsc,cwavef)
            do idat=1,ndat
              do ispinor=1,my_nspinor
                !$OMP PARALLEL DO PRIVATE(ig,igspinor)

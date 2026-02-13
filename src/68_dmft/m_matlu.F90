@@ -36,7 +36,7 @@ MODULE m_matlu
  use, intrinsic :: iso_c_binding, only: c_size_t, c_loc
  use m_abi_linalg
 
-#ifdef HAVE_GPU
+#if defined(HAVE_GPU) || defined(HAVE_OPENMP_OFFLOAD)
  use m_gpu_toolbox
 #endif
 
@@ -719,8 +719,8 @@ end subroutine print_matlu
 !Local variables-------------------------------
  integer :: at_indx,iatom,irot,isppol,lpawu,m1,m2,mu,natom
  integer :: ndim,ndim_max,nspinor,nsppol,nsym,nu,gpu_option
- complex(dpc), allocatable :: gloc_tmp(:,:,:),gloc_tmp2(:,:,:)
- complex(dpc), allocatable :: gloc_tmp3(:,:,:,:),gloc_tmp4(:,:,:,:)
+ complex(dpc), allocatable, target :: gloc_tmp(:,:,:),gloc_tmp2(:,:,:)
+ complex(dpc), allocatable, target :: gloc_tmp3(:,:,:,:),gloc_tmp4(:,:,:,:)
  type(matlu_type), allocatable, target :: gloc_nmrep(:),glocsym(:)
  complex(dpc), ABI_CONTIGUOUS pointer :: zarot(:,:,:,:),gloc_mat(:,:,:),glocsym_mat(:,:,:)
  real(dp), ABI_CONTIGUOUS pointer :: symrec_cart(:,:,:)

@@ -420,11 +420,34 @@ if(OpenMP_FOUND)
       if ("${CMAKE_Fortran_COMPILER_ID}" MATCHES "NVHPC")
         set(HAVE_OPENMP_OFFLOAD_DATASTRUCTURE 1)
       endif()
+    endif(HAVE_OPENMP_OFFLOAD_BOOL)
 
-    else()
+  elseif (CMAKE_C_COMPILER_ID STREQUAL "IntelLLVM") # Add offloading support for Intel LLVM compiler
+
+      include(manage_openmp_target)
+      get_offload_flags(TARGET spir64 RESULT OPENMP_OFFLOAD_FLAGS)
+
+      # check for OpenMP GPU offload support (OpenMP v5 onwards)
+      try_compile(HAVE_OPENMP_OFFLOAD_BOOL ${CMAKE_BINARY_DIR}/try_compile ${CMAKE_SOURCE_DIR}/cmake/try_compile/have_openmp_offload.F90
+        LINK_OPTIONS ${OPENMP_OFFLOAD_FLAGS}
+        LINK_LIBRARIES ${OPENMP_OFFLOAD_FLAGS})
+      if(HAVE_OPENMP_OFFLOAD_BOOL)
+        set(HAVE_OPENMP_OFFLOAD 1)
+
+        # check whether compiler implements omp_get_mapped_ptr
+        try_compile(HAVE_OPENMP_GET_MAPPED_PTR_BOOL ${CMAKE_BINARY_DIR}/try_compile ${CMAKE_SOURCE_DIR}/cmake/try_compile/have_openmp_get_mapped_ptr.F90
+        LINK_LIBRARIES ${OPENMP_OFFLOAD_FLAGS})
+        if(HAVE_OPENMP_GET_MAPPED_PTR_BOOL)
+          set(HAVE_OPENMP_GET_MAPPED_PTR 1)
+        endif()
+
+      endif()
+
+  else()
+
       message(STATUS "OpenMP offload isn't supported and disabled.")
-    endif()
-  endif(ABINIT_ENABLE_GPU_CUDA OR ABINIT_ENABLE_GPU_HIP)
+
+  endif()
 
   if(ABINIT_ENABLE_NVIDIA_UNIFIED_MEM)
     if (NOT "${CMAKE_Fortran_COMPILER_ID}" MATCHES "NVHPC")
