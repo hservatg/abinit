@@ -840,8 +840,6 @@ contains
     integer,optional,intent(in) :: cols
     type(c_ptr) :: cptr
 
-    integer(kind=8) :: adr
-
     integer :: rows_,cols_,fact
 
     fact = 1 ; if (xgBlock%space==SPACE_CR) fact = 2
@@ -922,8 +920,6 @@ contains
     integer,optional,intent(in) :: rows
     integer,optional,intent(in) :: cols
     type(c_ptr) :: cptr
-
-    integer(kind=8) :: adr
 
     integer :: rows_,cols_
 
