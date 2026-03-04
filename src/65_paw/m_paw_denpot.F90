@@ -170,6 +170,7 @@ subroutine pawdenpot(compch_sph,el_temp,gprimd,ipert,ixc,my_natom,natom,nspden,n
 
 !Arguments ---------------------------------------------
 !scalars
+
  integer,intent(in) :: ipert,ixc,my_natom,natom,nspden,ntypat,nzlmopt,option,pawprtvol
  integer,intent(in) :: pawspnorb,pawxcdev,xclevel
  integer,optional,intent(in) :: comm_atom
