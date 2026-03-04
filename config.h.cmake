@@ -596,6 +596,9 @@
 /* Define to 1 if you have MAGMA >=1.5 API support */
 #cmakedefine HAVE_LINALG_MAGMA_15 @HAVE_LINALG_MAGMA_15@
 
+/* Define to 1 if you have MKL. */
+#cmakedefine HAVE_MKL @HAVE_MKL@
+
 /* Define to 1 if you have MKL imatcopy extensions. */
 #cmakedefine HAVE_LINALG_MKL_IMATCOPY @HAVE_LINALG_MKL_IMATCOPY@
 

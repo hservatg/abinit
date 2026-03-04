@@ -37,7 +37,7 @@ module m_abi_linalg
  use plasma, except_dp => dp, except_sp => sp
 #endif
 
-#if defined HAVE_GPU
+#if defined(HAVE_GPU) || defined(HAVE_OPENMP_OFFLOAD)
  use m_gpu_toolbox
 #endif
 
@@ -114,7 +114,7 @@ module m_abi_linalg
 
  integer, save, private     :: abi_linalg_gpu_mode = ABI_GPU_DISABLED
 
-#ifdef HAVE_GPU
+#if defined(HAVE_GPU) || defined(HAVE_OPENMP_OFFLOAD)
  integer,                       allocatable,save,private,target :: i_work(:)
  real(kind=c_double),           allocatable,save,private,target :: r_work(:)
  complex(kind=c_double_complex),allocatable,save,private,target :: c_work(:)
@@ -330,7 +330,7 @@ module m_abi_linalg
  public :: ortho_reim
  !----------------------------------------------------------------------
 
-#ifdef HAVE_GPU
+#if defined(HAVE_GPU) || defined(HAVE_OPENMP_OFFLOAD)
 
   interface
 
@@ -617,7 +617,7 @@ CONTAINS  !===========================================================
 #endif
 #endif
 
-#ifdef HAVE_GPU
+#if defined(HAVE_GPU) || defined(HAVE_OPENMP_OFFLOAD)
 !Cublas initialization
  if (gpu_option/=ABI_GPU_DISABLED) call gpu_linalg_init()
  abi_linalg_gpu_mode = gpu_option !FIXME Add a check for this
@@ -895,7 +895,7 @@ CONTAINS  !===========================================================
 #endif
 #endif
 
-#ifdef HAVE_GPU
+#if defined(HAVE_GPU) || defined(HAVE_OPENMP_OFFLOAD)
  if (gpu_option/=ABI_GPU_DISABLED) then
    call abi_gpu_work_finalize()
    call gpu_linalg_shutdown()

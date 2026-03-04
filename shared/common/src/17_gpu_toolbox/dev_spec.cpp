@@ -18,5 +18,7 @@
 #ifdef HAVE_GPU_HIP
 #include "dev_spec_hip.cpp"
 #endif
-
+#ifdef HAVE_OPENMP_OFFLOAD
+#include "dev_spec_openmp.cpp"
+#endif
 

@@ -36,7 +36,7 @@ MODULE m_matlu
  use, intrinsic :: iso_c_binding, only: c_size_t, c_loc
  use m_abi_linalg
 
-#ifdef HAVE_GPU
+#if defined(HAVE_GPU) || defined(HAVE_OPENMP_OFFLOAD)
  use m_gpu_toolbox
 #endif
 

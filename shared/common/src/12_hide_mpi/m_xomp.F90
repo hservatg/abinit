@@ -501,11 +501,13 @@ end function xomp_is_initial_device
 
 function xomp_target_is_present(ptr)
 
+ use, intrinsic :: iso_c_binding
+
 !Arguments ------------------------------------
  type(c_ptr),intent(in) :: ptr
 
  logical :: xomp_target_is_present
- integer(kind=c_int) :: device_id, rc
+ integer(kind=c_int) :: device_id
 
 ! *************************************************************************
 
@@ -514,9 +516,7 @@ function xomp_target_is_present(ptr)
  xomp_target_is_present = .true. ! No check needed in unified memory
 #else
  device_id = xomp_get_default_device()
- rc = omp_target_is_present(ptr, device_id)
- xomp_target_is_present = .true.
- if(rc==0) xomp_target_is_present = .false.
+ xomp_target_is_present = omp_target_is_present(ptr, device_id) .ne. 0
 #endif
 #else
  xomp_target_is_present = .false.

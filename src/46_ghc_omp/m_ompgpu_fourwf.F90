@@ -32,7 +32,7 @@ module m_ompgpu_fourwf
  use iso_c_binding
 #endif
 
-#ifdef HAVE_GPU
+#if defined(HAVE_GPU) || defined(HAVE_OPENMP_OFFLOAD)
  use m_gpu_toolbox
 #endif
 

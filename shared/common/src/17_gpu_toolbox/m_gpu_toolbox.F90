@@ -42,7 +42,7 @@ module m_gpu_toolbox
 
   !Interfaces for C bindings --- To be completed
 #ifdef HAVE_FC_ISO_C_BINDING
-#if defined HAVE_GPU
+#if defined(HAVE_GPU) || defined(HAVE_OPENMP_OFFLOAD)
 
   ! mirroring cuda enum cudaMemoryAdvise usually defined in
   ! /usr/local/cuda/targets/x86_64-linux/include/driver_types.h
@@ -182,7 +182,7 @@ contains
   !!***
 
 #ifdef HAVE_FC_ISO_C_BINDING
-#if defined HAVE_GPU
+#if defined (HAVE_GPU) || defined(HAVE_OPENMP_OFFLOAD)
 
   ! prefetch data (memory managed pointer) to device
   ! device can be a GPU (deviceId >=0)

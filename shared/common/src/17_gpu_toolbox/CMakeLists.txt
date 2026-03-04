@@ -17,6 +17,15 @@ set_target_properties(17_gpu_toolbox
   PROPERTIES
   Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/modules)
 
+if (HAVE_OPENMP_OFFLOAD)
+  set(all_OMP_FLAGS "${OpenMP_Fortran_FLAGS}" "${OPENMP_OFFLOAD_FLAGS}")
+  list(JOIN all_OMP_FLAGS " " content)
+  set_target_properties(17_gpu_toolbox
+    PROPERTIES
+    COMPILE_FLAGS "${content}"
+  )
+endif()
+
 target_include_directories(17_gpu_toolbox
   PRIVATE
   ${CMAKE_BINARY_DIR}

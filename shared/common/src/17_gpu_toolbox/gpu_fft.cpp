@@ -17,7 +17,10 @@
 
 #ifdef HAVE_GPU_CUDA
 #include "gpu_fft_cuda.cpp"
-#endif
-#ifdef HAVE_GPU_HIP
+#elif HAVE_GPU_HIP
 #include "gpu_fft_hip.cpp"
+#elif defined(HAVE_MKL) && defined(HAVE_OPENMP_OFFLOAD)
+#include "gpu_fft_mkl.cpp"
+#else
+#error Unknown GPU FFT implementation to be used
 #endif

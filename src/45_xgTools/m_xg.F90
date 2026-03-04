@@ -44,7 +44,7 @@ module m_xg
   use m_xomp
   use m_abi_linalg
 
-#if defined(HAVE_GPU)
+#if defined(HAVE_GPU) || defined(HAVE_OPENMP_OFFLOAD)
   use m_gpu_toolbox
 #endif
 
@@ -405,10 +405,10 @@ contains
     integer   , intent(in   ) :: cols
     integer   , optional, intent(in) :: comm, me_g0, gpu_option
     integer                   :: l_gpu_option,fact
-#if defined HAVE_GPU
+#if defined (HAVE_GPU) || defined(HAVE_OPENMP_OFFLOAD)
     integer(kind=c_int32_t), parameter :: izero = 0
 #endif
-#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD && !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
+#if defined(HAVE_OPENMP_OFFLOAD) && !defined(HAVE_OPENMP_OFFLOAD_DATASTRUCTURE)
     complex(dp), pointer :: xg__vecC(:,:)
     real(dp), pointer :: xg__vecR(:,:)
 #endif
@@ -451,7 +451,7 @@ contains
 
     else if (l_gpu_option==ABI_GPU_OPENMP) then
 
-#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+#if defined (HAVE_GPU) || defined (HAVE_OPENMP_OFFLOAD)
       select case (space)
 
       case (SPACE_R,SPACE_CR)
@@ -551,7 +551,7 @@ contains
     integer :: col
 !    double precision :: tsec(2)
 
-#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+#if defined (HAVE_GPU) || defined (HAVE_OPENMP_OFFLOAD)
     complex(dp), pointer :: xg__vecC(:,:)
     real(dp), pointer :: xg__vecR(:,:)
 #endif

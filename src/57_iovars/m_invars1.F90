@@ -34,7 +34,7 @@ module m_invars1
 #if defined DEV_YP_VDWXC
  use m_xc_vdw
 #endif
-#if defined HAVE_GPU
+#if defined(HAVE_GPU) || defined(HAVE_OPENMP_OFFLOAD)
  use m_gpu_toolbox
 #endif
 
@@ -541,7 +541,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
 
  ! GPU related parameters
  dtsets(:)%gpu_option=ABI_GPU_DISABLED
-#if defined HAVE_GPU
+#if defined(HAVE_GPU) || defined(HAVE_OPENMP_OFFLOAD)
  call Get_ndevice(idev)
  if (idev>0) then
    do i1=1,ndtset_alloc
@@ -575,7 +575,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
  end do
 
  if (gpu_option/=ABI_GPU_DISABLED) then
-#if defined HAVE_GPU
+#if defined(HAVE_GPU) || defined(HAVE_OPENMP_OFFLOAD)
    if (idev<=0) then
      write(msg,'(5a)')&
      'Input variable gpu_option is on (/=0),',ch10,&

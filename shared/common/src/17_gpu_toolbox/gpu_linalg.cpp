@@ -18,6 +18,8 @@
 #ifdef HAVE_GPU_CUDA
 #include "gpu_linalg_cuda.cpp"
 #endif
-#ifdef HAVE_GPU_HIP
+#elif HAVE_GPU_HIP
 #include "gpu_linalg_hip.cpp"
+#elif defined(HAVE_MKL) && defined(HAVE_OPENMP_OFFLOAD)
+#include "gpu_linalg_mkl.cpp"
 #endif
